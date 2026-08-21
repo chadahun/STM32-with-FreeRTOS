@@ -60,7 +60,6 @@ static TaskHandle_t xBlinkHandle = NULL;
 static TaskHandle_t xHeartbeatHandle = NULL;
 static TaskHandle_t xButtonHandle = NULL;
 static TaskHandle_t xStatsHandle = NULL;
-static TaskHandle_t xI2CHandle = NULL;
 static TaskHandle_t xSensorHandle = NULL;
 static TaskHandle_t xServoHandle = NULL;
 static TaskHandle_t xDisplayHandle = NULL;
@@ -79,8 +78,6 @@ extern UART_HandleTypeDef huart1;
 static float g_peak_current = 0, g_volt_at_peak = 0;
 static volatile uint8_t g_servo_blocked = 0;
 
-#define CURRENT_LIMIT_A 0.4f
-#define OVER_COUNT_LIMIT 10
 #define CURRENT_AVG_LIMIT 0.15f
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
@@ -97,7 +94,6 @@ static void vBlinkTask(void *pvParameters);
 static void vHeartbeatTask(void *pvParameters);
 static void vButtonTask(void *pvParameters);
 static void vStatsTask(void *pvParameters);
-static void vI2CScanTask(void *pvParameters);
 static void vSensorTask(void *pvParameters);
 static void vServoTask(void *pvParameters);
 static void vDisplayTask(void *pvParameters);
@@ -192,16 +188,6 @@ void MX_FREERTOS_Init(void) {
 		  &xStatsHandle
   );
   configASSERT(xResult == pdPASS);
-
-//  xResult = xTaskCreate(
-//		  vI2CScanTask,
-//		  "I2C",
-//		  256,
-//		  NULL,
-//		  1,
-//		  &xI2CHandle
-//  );
-//  configASSERT(xResult == pdPASS);
 
   xResult = xTaskCreate(
 		  vSensorTask,
@@ -309,23 +295,6 @@ static void vStatsTask(void *pvParameters){
 		vTaskDelay(pdMS_TO_TICKS(5000));
 	}
 }
-
-//static void vI2CScanTask(void *pvParameters){
-//	char msg[32];
-//
-//	vTaskDelay(pdMS_TO_TICKS(500));
-//	for(;;){
-//		for(uint8_t addr = 1; addr < 128; addr++){
-//				HAL_StatusTypeDef I2CFlag = HAL_I2C_IsDeviceReady(&hi2c1, addr << 1, 1, 10);
-//				if(I2CFlag == HAL_OK){
-//					snprintf(msg, sizeof(msg), "Found: 0x%02X\r\n", addr);
-//					HAL_UART_Transmit(&huart2, (uint8_t *)msg, strlen(msg), 100);
-//				}
-//			}
-//		vTaskDelay(pdMS_TO_TICKS(5000));
-//	}
-//
-//}
 
 static void vSensorTask(void *pvParameters){
 	char msg[96];
